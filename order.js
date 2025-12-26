@@ -9,59 +9,72 @@ let selectedOrder = {
 };
 
 function addToOrder(keyword) {
+    console.log('🔍 Клик по блюду с keyword:', keyword);
+
     const dish = window.dishes.find(d => d.keyword === keyword);
-    if (!dish) return;
-    selectedOrder[dish.category] = dish;
+    if (!dish) {
+        console.error('❌ Блюдо не найдено:', keyword);
+        return;
+    }
+
+    console.log('✅ Найдено блюдо:', dish);
+
+    // Приводим category к нужному формату
+    let categoryKey = '';
+    switch (dish.category) {
+        case 'soup': categoryKey = 'soup'; break;
+        case 'main-course': categoryKey = 'main'; break;
+        case 'salad': categoryKey = 'starter'; break;
+        case 'drink': categoryKey = 'drink'; break;
+        case 'dessert': categoryKey = 'dessert'; break;
+        default: categoryKey = ''; break;
+    }
+
+    if (!categoryKey) {
+        console.warn('⚠️ Неизвестная категория:', dish.category);
+        return;
+    }
+
+    selectedOrder[categoryKey] = dish;
+
+    console.log('📦 Обновленный заказ:', selectedOrder);
+
     updateOrderDisplay();
 }
 
 function updateOrderDisplay() {
-    const orderContainer = document.querySelector('.order-column');
-    const soupDisplay = orderContainer.querySelector('#soup-display');
-    const mainDisplay = orderContainer.querySelector('#main-display');
-    const starterDisplay = orderContainer.querySelector('#starter-display');
-    const drinkDisplay = orderContainer.querySelector('#drink-display');
-    const dessertDisplay = orderContainer.querySelector('#dessert-display');
-    const totalDisplay = orderContainer.querySelector('#total-display');
+    const oc = document.querySelector('.order-column');
+    const sD = oc.querySelector('#soup-display');
+    const mD = oc.querySelector('#main-display');
+    const stD = oc.querySelector('#starter-display');
+    const drD = oc.querySelector('#drink-display');
+    const deD = oc.querySelector('#dessert-display');
+    const tD = oc.querySelector('#total-display');
 
-    soupDisplay.textContent = selectedOrder.soup ? `${selectedOrder.soup.name} ${selectedOrder.soup.price}₽` : 'Блюдо не выбрано';
-    mainDisplay.textContent = selectedOrder.main ? `${selectedOrder.main.name} ${selectedOrder.main.price}₽` : 'Блюдо не выбрано';
-    starterDisplay.textContent = selectedOrder.starter ? `${selectedOrder.starter.name} ${selectedOrder.starter.price}₽` : 'Блюдо не выбрано';
-    drinkDisplay.textContent = selectedOrder.drink ? `${selectedOrder.drink.name} ${selectedOrder.drink.price}₽` : 'Напиток не выбран';
-    dessertDisplay.textContent = selectedOrder.dessert ? `${selectedOrder.dessert.name} ${selectedOrder.dessert.price}₽` : 'Десерт не выбран';
+    sD.textContent = selectedOrder.soup ? `${selectedOrder.soup.name} ${selectedOrder.soup.price}₽` : 'Блюдо не выбрано';
+    mD.textContent = selectedOrder.main ? `${selectedOrder.main.name} ${selectedOrder.main.price}₽` : 'Блюдо не выбрано';
+    stD.textContent = selectedOrder.starter ? `${selectedOrder.starter.name} ${selectedOrder.starter.price}₽` : 'Блюдо не выбрано';
+    drD.textContent = selectedOrder.drink ? `${selectedOrder.drink.name} ${selectedOrder.drink.price}₽` : 'Напиток не выбран';
+    deD.textContent = selectedOrder.dessert ? `${selectedOrder.dessert.name} ${selectedOrder.dessert.price}₽` : 'Десерт не выбран';
 
-    const hasAnySelection = selectedOrder.soup || selectedOrder.main || selectedOrder.starter || selectedOrder.drink || selectedOrder.dessert;
+    const hasSel = selectedOrder.soup || selectedOrder.main || selectedOrder.starter || selectedOrder.drink || selectedOrder.dessert;
 
-    const soupHeader = orderContainer.querySelector('#soup-header');
-    const mainHeader = orderContainer.querySelector('#main-header');
-    const starterHeader = orderContainer.querySelector('#starter-header');
-    const drinkHeader = orderContainer.querySelector('#drink-header');
-    const dessertHeader = orderContainer.querySelector('#dessert-header');
-    const totalHeader = orderContainer.querySelector('#total-header');
+    oc.querySelector('#soup-header').style.display = hasSel ? 'block' : 'none';
+    oc.querySelector('#main-header').style.display = hasSel ? 'block' : 'none';
+    oc.querySelector('#starter-header').style.display = hasSel ? 'block' : 'none';
+    oc.querySelector('#drink-header').style.display = hasSel ? 'block' : 'none';
+    oc.querySelector('#dessert-header').style.display = hasSel ? 'block' : 'none';
+    oc.querySelector('#total-header').style.display = hasSel ? 'block' : 'none';
 
-    if (hasAnySelection) {
-        soupHeader.style.display = 'block';
-        mainHeader.style.display = 'block';
-        starterHeader.style.display = 'block';
-        drinkHeader.style.display = 'block';
-        dessertHeader.style.display = 'block';
-        totalHeader.style.display = 'block';
-
+    if (hasSel) {
         let total = 0;
         if (selectedOrder.soup) total += selectedOrder.soup.price;
         if (selectedOrder.main) total += selectedOrder.main.price;
         if (selectedOrder.starter) total += selectedOrder.starter.price;
         if (selectedOrder.drink) total += selectedOrder.drink.price;
         if (selectedOrder.dessert) total += selectedOrder.dessert.price;
-
-        totalDisplay.textContent = `${total}₽`;
+        tD.textContent = `${total}₽`;
     } else {
-        soupHeader.style.display = 'none';
-        mainHeader.style.display = 'none';
-        starterHeader.style.display = 'none';
-        drinkHeader.style.display = 'none';
-        dessertHeader.style.display = 'none';
-        totalHeader.style.display = 'none';
-        totalDisplay.textContent = '';
+        tD.textContent = '';
     }
 }

@@ -1,51 +1,50 @@
 // displayDishes.js
 
-// Глобальная переменная — доступна из order.js
 window.dishes = [];
 
 async function loadDishes() {
-    const apiUrl = 'https://edu.std-900.ist.mospolytech.ru/labs/api/dishes';
+    const apiUrl = 'http://lab7-api.std-900.ist.mospolytech.ru/api/dishes';
 
     try {
         const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error('Ошибка загрузки');
+        if (!response.ok) throw new Error(`Ошибка ${response.status}`);
         window.dishes = await response.json();
+        console.log('✅ Блюда загружены:', window.dishes.length, 'шт.');
+
+        // Debug: показать все категории
+        console.log('Все категории:', [...new Set(window.dishes.map(d => d.category))]);
+
         renderAllSections();
     } catch (err) {
-        console.error('❌ Не удалось загрузить блюда:', err);
+        console.error('❌ Ошибка загрузки:', err);
     }
 }
 
 function renderAllSections() {
-    document.querySelectorAll('.menu-section').forEach(section => {
-        const title = section.querySelector('h2')?.textContent || '';
-        let cat = '';
-        if (/суп/i.test(title)) cat = 'soup';
-        else if (/главное/i.test(title)) cat = 'main';
-        else if (/салат|стартер/i.test(title)) cat = 'starter';
-        else if (/напиток/i.test(title)) cat = 'drink';
-        else if (/десерт/i.test(title)) cat = 'dessert';
+    const sections = Array.from(document.querySelectorAll('.menu-section'));
+    sections.forEach((section, index) => {
+        const categories = ['soup', 'main-course', 'salad', 'drink', 'dessert'];
+        const categoryKey = categories[index];
+        if (!categoryKey) return;
 
-        const grid = section.querySelector('.dishes-grid');
-        const filtered = window.dishes.filter(d => d.category === cat);
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        renderDishes(filtered, grid);
+        const catDishes = window.dishes.filter(d => d.category === categoryKey);
+        catDishes.sort((a, b) => a.name.localeCompare(b.name));
+        renderDishes(catDishes, section.querySelector('.dishes-grid'));
 
-        // Фильтры
         const filters = section.querySelector('.filters');
         if (filters) {
-            const buttons = filters.querySelectorAll('button');
-            buttons.forEach(btn => {
+            const btns = filters.querySelectorAll('button');
+            btns.forEach(btn => {
                 btn.addEventListener('click', function () {
                     const kind = this.dataset.kind;
-                    buttons.forEach(b => b.classList.remove('active'));
+                    btns.forEach(b => b.classList.remove('active'));
                     if (this.classList.contains('active')) {
                         this.classList.remove('active');
-                        renderDishes(filtered, grid);
+                        renderDishes(catDishes, section.querySelector('.dishes-grid'));
                     } else {
                         this.classList.add('active');
-                        const f = filtered.filter(d => d.kind === kind);
-                        renderDishes(f, grid);
+                        const f = catDishes.filter(d => d.kind === kind);
+                        renderDishes(f, section.querySelector('.dishes-grid'));
                     }
                 });
             });
